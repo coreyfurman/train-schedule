@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>All Aboard</title>
+  <!-- Bootswatch Styling for Improving the Aesthetics -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/flatly/bootstrap.min.css">
+
+  <!-- Font Awesome CSS Icons (For cool glyphicons) -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+  <script src="https://code.jquery.com/jquery.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/4.1.1/firebase.js"></script>
+  <!-- Style to fix the issue of text extending past panel length -->
+  <style>
+    .panel-body a {
+      word-break: break-all;
+    }
+    td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px 40px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- Main Bootstrap Search -->
+  <div class="container">
+
+    <!-- Jumbotron for Title -->
+    <div class="jumbotron" style="background-color: #222222 ; color: white;">
+      <h1 class="text-center"><strong>Train Schedule</strong></h1>
+    </div>
+
+ <!-- This row will handle all of the retrieved articles -->
+    <div class="row">
+      <div class="col-sm-12">
+        <br>
+
+        <!-- This panel will initially be made up of a panel and wells for each of the articles retrieved -->
+        <div class="panel panel-primary">
+
+          <!-- Panel Heading for the retrieved articles box -->
+          <div class="panel-heading" style="background-color: #222222 ; color: white;">
+            <h3 class="panel-title"><strong>Current Train Schedule</strong></h3>
+          </div>
+
+          <!-- This main panel will hold each of the resulting articles -->
+      
+         <div class="panel panel-default">
+          <div class="panel-body" id="trainz">
+            <table id="train-id">
+              <tr>
+                <th>Train Name</th>
+                <th>Destination</th>
+                <th>Frequency (min)</th>
+                <th>Next Arrival</th>
+                <th>Minutes Away</th>
+              </tr>
+              <tr>
+                <td id="train-display"></td>
+                <td id="destination-display"></td>
+                <td id="time-display"></td>
+                <td id="freq-display"></td>
+                <td id="diff-display"</td>
+              </tr>            
+            </table>
+          </div>
+        </div>
+      </div>
+   
+
+
+    <!-- Row for Searching New York Times -->
+    <div class="row">
+      <div class="col-sm-12">
+        <br>
+        <!-- First panel is for handling the search parameters -->
+        <div class="panel panel-primary">
+          <div class="panel-heading" style="background-color: #222222 ; color: white;">
+            <h3 class="panel-title"><strong>Add Train</strong></h3>
+          </div>
+          <div class="panel-body">
+
+            <!-- Here we create an HTML Form for handling the inputs-->
+            <form role="form">
+
+              <!-- Here we create the text box for capturing the search term-->
+              <div class="form-group">
+                <label for="train-name">Train Name:</label>
+                <input type="text" class="form-control" id="train-name">
+              </div>
+            
+              <div class="form-group">
+                <label for="destination-field">Destination:</label>
+                <input type="text" class="form-control" id="destination-field">
+						</select>
+              </div>
+
+              <div class="form-group">
+                <label for="freq-time">Frequency</label>
+                <input type="text" class="form-control" id="freq-time">
+              </div>
+
+              <div class="form-group">
+                <label for="next">Next Arrival</label>
+                <input type="text" class="form-control" id="next">
+              </div>
+
+              <button type="submit" class="btn btn-default" id="add-train"> Submit</button>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <script>
+
+
+  var config = {
+    apiKey: "AIzaSyAzThyJzsuyqFylR1YBMjBuTR7vXn32NTk",
+    authDomain: "train-schedule-4025b.firebaseapp.com",
+    databaseURL: "https://train-schedule-4025b.firebaseio.com",
+    projectId: "train-schedule-4025b",
+    storageBucket: "train-schedule-4025b.appspot.com",
+    messagingSenderId: "538680216983"
+  };
+  
+  firebase.initializeApp(config);
+
+
+    var database = firebase.database();
+
+    var trainName = "";
+    var destination = "";
+    var tTime = 0;
+    var freq = "";
+
+    // To make tTime appear correct
+    
+    // var convertedDate = moment(new Date(tTime));
+
+    $("#add-train").on("click", function(event) {
+      event.preventDefault();
+
+      tName = $("#train-name").val().trim();
+      destination = $("#destination-field").val().trim();
+      freqTime = $("#freq-time").val().trim();
+      nextArrival = $("#next").val().trim();
+
+
+
+
+
+      database.ref().push({
+        tName: tName,
+        destination: destination,
+        freqTime: freqTime,
+        nextArrival: nextArrival,
+      });
+
+    });
+
+    database.ref().on("child_added", function(snapshot) {
+
+      console.log(snapshot.val());
+
+      var sv = snapshot.val();
+      
+      var svArr = Object.keys(sv);
+
+      var lastIndex = svArr.length - 1;
+
+      var lastKey = svArr[lastIndex];
+
+      var lastObj = sv[lastKey]
+
+      console.log(lastObj.tName);
+      console.log(lastObj.destination);
+      console.log(lastObj.freqTime);
+      console.log(lastObj.nextArrival);
+      console.log(lastObj.diff)
+
+      // diff equals the current time minus the next arrival time in military time.
+
+
+
+      $("#train-id").append("<tr><td>" + snapshot.val().tName + "</td> <td>" + snapshot.val().destination + " </td> <td>" + snapshot.val().freqTime + " </td> <td>" + snapshot.val().nextArrival + " </td> <td>" + snapshot.val().diff + " </td></tr>");
+
+    }, function(errorObject) {
+      console.log("Errors handled: " + errorObject.code);
+    });
+
+</script>
+
+</body>
+
+</html>
